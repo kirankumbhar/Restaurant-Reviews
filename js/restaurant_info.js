@@ -88,7 +88,11 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  //image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.src = `/small_images/${restaurant.id}-400_small.jpg`;
+  image.alt = `Image of "${restaurant.name}`;
+  image.srcset = `/small_images/${restaurant.id}-400_small.jpg 400w, ${DBHelper.imageUrlForRestaurant(restaurant)} 800w`;
+
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
@@ -148,20 +152,43 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
  */
 createReviewHTML = (review) => {
   const li = document.createElement('li');
-  const name = document.createElement('p');
-  name.innerHTML = review.name;
-  li.appendChild(name);
 
   const date = document.createElement('p');
   date.innerHTML = review.date;
+  date.id = "review-date";
   li.appendChild(date);
 
+  const name = document.createElement('p');
+  name.id = "reviewer-name";
+  name.innerHTML = review.name;
+  li.appendChild(name);
+
   const rating = document.createElement('p');
-  rating.innerHTML = `Rating: ${review.rating}`;
+  console.log(review.rating);
+  for (var i = 0; i < review.rating; i++) {
+    const star = document.createElement('span');
+    star.className = "fa fa-star checked";
+    rating.appendChild(star);
+  }
+  for (var i = review.rating; i < 5; i++) {
+    const star = document.createElement('span');
+    star.className = "fa fa-star";
+    rating.appendChild(star);
+  }
+
+  //Adding ARIA semantics to review
+  rating.setAttribute('aria-labelledby',`rating-label-div-${review.rating}`);
+  // rating.aria-labelledby = "rating-label-div";
+  const labeldiv = document.createElement('div');
+  labeldiv.id = `rating-label-div-${review.rating}`;
+  labeldiv.innerHTML = `Rating ${review.rating} out of 5`;
+  labeldiv.hidden = true;
+  li.appendChild(labeldiv);
   li.appendChild(rating);
 
   const comments = document.createElement('p');
   comments.innerHTML = review.comments;
+  comments.id = "review-comments";
   li.appendChild(comments);
 
   return li;

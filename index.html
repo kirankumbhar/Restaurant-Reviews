@@ -16,14 +16,16 @@
 
 <body>
   <header>
+    <a href="#neighborhoods-select" class="skip-link">Skip to restaurant's filter results</a>
     <nav>
-      <h1><i class="fa fa-cutlery" aria-hidden="true"></i><a href="/">Restaurant Reviews</a></h1>
+      <div id="logo-div" hidden>Website logo with image of fork and knife</div>
+      <h1><i class="fa fa-cutlery" aria-labelledby="logo-div"></i><a href="/">Restaurant Reviews</a></h1>
     </nav>
   </header>
 
-  <main id="maincontent">
+  <main id="maincontent" role="main">
     <section id="map-container">
-      <div id="map"></div>
+      <div id="map" tabindex="-1"></div>
     </section>
     <section>
       <div class="filter-options">
@@ -35,7 +37,7 @@
           <option value="all">All Cuisines</option>
         </select>
       </div>
-      <div align="center" class="restaurant-listing">
+      <div class="restaurant-listing">
         <ul id="restaurants-list"></ul>
       </div>
       <div class="clear">

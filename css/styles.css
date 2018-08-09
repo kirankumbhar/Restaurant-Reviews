@@ -150,7 +150,7 @@ nav h1 a {
   width: 200px;
 }
 .filter-options select:focus {
-	background-color: orange;
+	background-color: #252831;
 	color: white;
 }
 /* ====================== Restaurant Listing ====================== */

@@ -8,12 +8,12 @@
       "sizes": "32x32"
     },
     {
-      "src": "/images/icons-48.png",
+      "src": "/images/icon-48.png",
       "type": "image/png",
       "sizes": "48x48"
     },
     {
-      "src": "/images/icons-64.png",
+      "src": "/images/icon-64.png",
       "type": "image/png",
       "sizes": "64x64"
     },
@@ -28,9 +28,9 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": "http://localhost:8000/",
-  "background_color": "#3367D6",
+  "start_url": "./index.html",
+  "background_color": "#252831",
   "display": "standalone",
-  "scope": "/maps/",
-  "theme_color": "#3367D6"
+  "scope": "./",
+  "theme_color": "#252831"
 }

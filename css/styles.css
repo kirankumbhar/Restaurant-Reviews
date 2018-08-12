@@ -337,19 +337,16 @@ nav h1 a {
   position: relative;
 	width: 100%;
 }
-#reviewer-name {
+.reviewer-name {
 	border-radius: 7px;
 	background-color: grey;
 	padding: 10px;
 	color: white;
 }
-#review-date {
+.review-date {
 	float: right;
 	padding: 10px;
 	color: white;
-}
-#review-comments {
-
 }
 #reviews-list li p {
 	text-align: left;

@@ -141,8 +141,10 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     return;
   }
   const ul = document.getElementById('reviews-list');
+  let id=1;
   reviews.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
+    ul.appendChild(createReviewHTML(review,id));
+    id=id+1;
   });
   container.appendChild(ul);
 }
@@ -150,16 +152,16 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
 /**
  * Create review HTML and add it to the webpage.
  */
-createReviewHTML = (review) => {
+createReviewHTML = (review,id) => {
   const li = document.createElement('li');
 
   const date = document.createElement('p');
   date.innerHTML = review.date;
-  date.id = "review-date";
+  date.id = `review-date-${id}`;
   li.appendChild(date);
 
   const name = document.createElement('p');
-  name.id = "reviewer-name";
+  name.id = `reviewer-name-${id}`;
   name.innerHTML = review.name;
   li.appendChild(name);
 
@@ -177,10 +179,10 @@ createReviewHTML = (review) => {
   }
 
   //Adding ARIA semantics to review
-  rating.setAttribute('aria-labelledby',`rating-label-div-${review.rating}`);
+  rating.setAttribute('aria-labelledby',`rating-label-div-${review.rating}-${id}`);
   // rating.aria-labelledby = "rating-label-div";
   const labeldiv = document.createElement('div');
-  labeldiv.id = `rating-label-div-${review.rating}`;
+  labeldiv.id = `rating-label-div-${review.rating}-${id}`;
   labeldiv.innerHTML = `Rating ${review.rating} out of 5`;
   labeldiv.hidden = true;
   li.appendChild(labeldiv);
@@ -188,9 +190,8 @@ createReviewHTML = (review) => {
 
   const comments = document.createElement('p');
   comments.innerHTML = review.comments;
-  comments.id = "review-comments";
+  comments.id = `review-comments-${id}`;
   li.appendChild(comments);
-
   return li;
 }
 

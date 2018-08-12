@@ -1,9 +1,16 @@
 /**
  * Common database helper functions.
  */
-class DBHelper {
 
+class DBHelper {
+static createIdb() {
+  let dbPromise = idb.open('restaurants-db', 1, function(upgradeDb){
+		upgradeDb.createObjectStore('restaurants',{keyPath:'id'});
+	});
+  return dbPromise;
+}
   /**
+
    * Database URL.
    * Change this to restaurants.json file location on your server.
    */
@@ -12,24 +19,41 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
+  //open new IndexedDB connection
+
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
+    let idbPromise = DBHelper.createIdb();
     fetch(DBHelper.DATABASE_URL).then(function(response){
-      if(response.ok){
-          return response.json();
+      if(!response.ok){
+        throw new Error(response.status);
+      }else{
+        return response.json();
       }
-      else{
-        throw new Error(`request failed returned status of ${response.status}`);
-      }
+
     })
     .then(function(jsondata){
+      //store restaurants data in IndexedDB
+        idbPromise.then(function(db){
+          let storeTransaction = db.transaction('restaurants','readwrite');
+          let restaurantsStore = storeTransaction.objectStore('restaurants');
+          for(let key in jsondata){
+            restaurantsStore.put(jsondata[key]);
+        }
+        console.log("data inserted into idb!");
+      });
       callback(null,jsondata);
-      return jsondata;
-    })
-    .catch(function(error){
-      callback(error, null);
+    }).catch(function(error){
+      idbPromise.then(function(db){
+        let tx = db.transaction('restaurants','readonly');
+        let store = tx.objectStore('restaurants');
+        return store.getAll();
+      }).then(function(items){
+        callback(null,items);
+      });
+      //console.log(error);
     });
   }
 

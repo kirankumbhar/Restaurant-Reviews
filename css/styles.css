@@ -62,7 +62,7 @@ nav {
   background-color: #252831;
   text-align:center;
 }
-.fa-cutlery {
+.fa-utensils {
 	color: white;
 	font-size: 2em;
 	border: 2px solid white;
@@ -223,6 +223,56 @@ nav h1 a {
 }
 #restaurants-list li a:focus {
 	background-color: #3397DB;
+}
+
+#restaurants-list li .fav_icon_btn {
+	font-size: 1.8em;
+	border: none;
+	float: right;
+	background-color: transparent;
+}
+/* ====================== toast message  ====================== */
+#toast-msg {
+    visibility: hidden;
+    min-width: 240px;
+    margin-left: -125px;
+    background-color: #000;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    bottom: 30px;
+    font-size: 17px;
+		opacity: 0.8;
+}
+
+#toast-msg.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 0.8;}
+}
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 0.8;}
+}
+
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 0.8;}
+    to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 0.8;}
+    to {bottom: 0; opacity: 0;}
 }
 /* ====================== Restaurant Details ====================== */
 .inside header {

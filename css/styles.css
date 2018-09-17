@@ -230,6 +230,7 @@ nav h1 a {
 	border: none;
 	float: right;
 	background-color: transparent;
+	cursor: pointer;
 }
 /* ====================== toast message  ====================== */
 #toast-msg {
@@ -356,6 +357,116 @@ nav h1 a {
 #reviews-container {
   padding: 30px 40px 80px;
 }
+
+#review-button {
+	background-color: #252831;
+	color: white;
+	font-size: 1em;
+	padding: 10px;
+	border: none;
+	border-radius: 5px;
+}
+#modal_wrap {
+	background: rgba(0, 0, 0, 0.7);
+	height: 100%;
+	left: 0;
+	opacity: 1;
+	overflow: auto;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 10;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-transition: all 0.3s ease-in-out;
+	transition: all 0.3s ease-in-out;
+}
+.close {
+	visibility: hidden;
+}
+#review-form {
+	font-size: 1em;
+	top: 50%
+	left: 50%;
+	vertical-align: middle;
+	width: 600px;
+	border-radius: 5px;
+  background-color: #252831;
+	color: white;
+	padding: 10px;
+	margin: 0 auto;
+	text-align: left;
+	z-index: 100;
+}
+#review-form-header {
+	padding: 5px;
+}
+#review-form input[type=text], textarea {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+#review-form fieldset {
+	border: none;
+	display: inline-block;
+	overflow: hidden;
+}
+.rating-input {
+	float: right;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	margin: 0 0 0 -30px;
+	opacity: 0;
+}
+.rating-star {
+	position:relative;
+	float: right;
+	display: block;
+	width: 30px;
+	height: 30px;
+	background: url('/icons/star-solid.svg') 0 -30px;
+	color: white;
+	background-size: 30px 30px;
+}
+
+.rating:hover .rating-star:hover,
+.rating:hover .rating-star:hover ~ .rating-star,
+.rating-input:checked ~ .rating-star {
+	background: url('/icons/star-solid-yellow.svg') 0 -30px;
+	background-size: 30px 30px;
+}
+
+#submit-button, #cancel-button {
+	cursor: pointer;
+	text-align: center;
+	padding: 12px 20px;
+	margin: 8px 0;
+	display: inline-block;
+	border: none;
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+#submit-button {
+	background-color: #4caf50;
+	color: white;
+}
+#cancel-button {
+	float: right;
+	background-color: #f44336;
+	color: white;
+}
 #reviews-container h2 {
   color: #252831;
   font-size: 2rem;
@@ -433,6 +544,9 @@ nav h1 a {
 	#restaurants-list .restaurant-img {
 	  height: 200px;
 	}
+	#review-form {
+		width: 250px;
+	}
 
 }
 
@@ -458,9 +572,13 @@ nav h1 a {
 		font-size: 0.9rem;
 	}
 
+	#review-form {
+		width: 400px;
+	}
+
 }
 
-@media screen and (max-width: 380px) {
+@media screen and (max-width: 460px) {
 	#restaurant-img {
 		width: 270px;
 	}
@@ -471,6 +589,9 @@ nav h1 a {
 	#reviews-list li p {
 		font-size: 0.8rem;
 	  margin: 0 0 7px;
+	}
+	#review-form {
+		width: 300px;
 	}
 }
 @media screen and (min-width: 1200px) {

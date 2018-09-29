@@ -3,7 +3,7 @@ var CACHE_NAME = 'restaurant-review-cache-v1';
 var urlsToCache = [
   '/',
   'restaurant.html',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
+  'https://use.fontawesome.com/releases/v5.3.1/css/all.css',
   'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css',
   'css/styles.css',
   'js/dbhelper.js',

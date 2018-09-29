@@ -201,6 +201,7 @@ createRestaurantHTML = (restaurant) => {
   const fav_icon_btn = document.createElement('button');
   fav_icon_btn.id = `fav_icon_btn-${restaurant.id}`;
   fav_icon_btn.className = 'fav_icon_btn';
+  fav_icon_btn.setAttribute(`aria-label`,`Button to mrak restaurant as favourite`);
   fav_icon_btn.addEventListener('click', function(){
     favouriteRestaurant(restaurant.id)
   });

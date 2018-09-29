@@ -1,12 +1,136 @@
 let restaurant;
 var newMap;
+/*
+1. syncdata will post reviews to server which were added by user in offline mode
+2. it will also delete IndexedDB reviews which are no longer available on server.
+This will maintain integrity of all reviews
+*/
+function syncdata(event){
+  let idbPromise = DBHelper.createIdb();
+  if(event.type == `offline`){
+    console.log(`You went offline`);
+  }
+  if(event.type == `online`){
+    console.log(`you are online`);
+    //Synch all the data from idb with server whose synchStatus is `pending`
+    idbPromise.then(function(db){
+      let readTransaction = db.transaction('reviews', 'readonly');
+      let reviewsStore = readTransaction.objectStore('reviews');
+      return reviewsStore.getAll();
+    }).then(function(reviews){
+      let pending_reviews = []
+      for(key in reviews){
+        let review = reviews[key];
+        for(key in review){
+          //if key is synchStatus which is same as id then display that review
+          if (key == `synchStatus`) {
+            if(review[key] == `pending`){
+              //remove properties of objects which are not required while submiting review.
+              delete review.synchStatus;
+              delete review.id;
+              pending_reviews.push(review)
+              console.log(review);
+            }
+          }
+        }
+      }
+      console.log(pending_reviews);
+      //send post request to server to synch all pending reviews
+      for(index in pending_reviews){
+        console.log(pending_reviews[index]);
+        fetch('http://localhost:1337/reviews/',{
+          method: `POST`,
+          headers: {
+            "Content-Type": "application/json; charset=utf-8"
+          },
+          body: JSON.stringify(pending_reviews[index]),
+        })
+        .then(function(response){
+          if(!response.ok){
+            throw new Error(response.status);
+          }
+          else {
+            console.log(response.status);
+          }
+        }).catch(function(error){
+          console.log(error);
+        });
+      }
+
+    });
+
+    /*fetch all reviews from server for current restaurant
+    and delete all those reviews from IndexedDB which are not
+    present on server.
+    */
+    let id = getRestaurantId();
+    console.log(id);
+    fetch(`http://localhost:1337/reviews/?restaurant_id=${id}`,{
+      method: `GET`,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8"
+      }
+    })
+    .then(function(response){
+      return response.json();
+    })
+    .then(function(server_restaurant_reviews){
+      idbPromise.then(function(db){
+        let readTransaction = db.transaction('reviews', 'readonly');
+        let reviewsStore = readTransaction.objectStore('reviews');
+        return reviewsStore.getAll();
+      }).then(function(allIdbReviews){
+        //get reviews for only current restaurant
+        let idb_restaurant_reviews = []
+        for(key in allIdbReviews){
+          let review = allIdbReviews[key];
+          for(key in review){
+            if(key == `restaurant_id`){
+              if(review[key] == id){
+                idb_restaurant_reviews.push(review);
+              }
+            }
+          }
+        }
+
+        console.log(Math.max(idb_restaurant_reviews.length,server_restaurant_reviews.length));
+        let flag = 0;
+        for(let i=0;i<idb_restaurant_reviews.length;i++){
+          for(let j=0;j<server_restaurant_reviews.length;j++){
+            if(idb_restaurant_reviews[i].id == server_restaurant_reviews[j].id){
+              flag=1;
+            }
+          }
+          if(flag == 0){ //idb review is not present on server
+            //idb promise to delete review which is not present on server
+            console.log(idb_restaurant_reviews[i]);
+            idbPromise.then(function(db){
+              let readTransaction = db.transaction('reviews', 'readwrite');
+              let reviewsStore = readTransaction.objectStore('reviews');
+              return reviewsStore.delete(idb_restaurant_reviews[i].id);
+            }).then(function(status){
+              console.log(status);
+            })
+          }
+          else{
+            //review is presnt on server. Rreset flag value to 0 again.
+            flag = 0;
+          }
+        }
+      });
+    });
+  }
+}
+window.addEventListener(`online`,syncdata);
+window.addEventListener(`offline`,syncdata);
+
 
 /**
  * Initialize map as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
   initMap();
-  reviewButtonHTML();
+
 });
 
 /**
@@ -72,11 +196,16 @@ fetchRestaurantFromURL = (callback) => {
         return;
       }
       fillRestaurantHTML();
+      fetchReviews();
+      reviewButtonHTML();
+      getRestaurantId();
       callback(null, restaurant)
     });
   }
 }
-
+getRestaurantId = (restaurant=self.restaurant) => {
+  return restaurant.id;
+}
 /**
  * Create restaurant HTML and add it to the webpage
  */
@@ -103,7 +232,8 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
+  //
+  //fillReviewsHTML();
 }
 
 /**
@@ -126,7 +256,8 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
   }
 }
 
-showReviewForm = () => {
+showReviewForm = (id) => {
+  let idbPromise = DBHelper.createIdb();
   const container = document.getElementById('maincontent');
   const modal_wrap = document.createElement('div');
   modal_wrap.id = `modal_wrap`
@@ -156,9 +287,10 @@ showReviewForm = () => {
       const radio_star = document.createElement('input');
       radio_star.type = `radio`;
       radio_star.name = `star_rating`;
-      radio_star.id = `star-${i}`;
-      radio_star.value = i;
+      radio_star.id = `star-${i+1}`;
+      radio_star.value = i+1;
       radio_star.className = `rating-input`;
+      radio_star.setAttribute(`aria-label`,`radio input for ${i+1} star rating`);
       rating.appendChild(radio_star);
 
       //creating label for radio button which will use as star
@@ -175,6 +307,7 @@ showReviewForm = () => {
   const name = document.createElement('input');
   name.type = `text`;
   name.id = `fullname`;
+  name.setAttribute(`aria-label`,`text input for name`);
 
   const nameLabel = document.createElement('label');
   nameLabel.htmlFor = name.id;
@@ -186,6 +319,7 @@ showReviewForm = () => {
 
   const comments = document.createElement('textarea');
   comments.id = `comments`;
+  comments.setAttribute(`aria-label`,`textarea to add comments`);
 
   const commentsLabel = document.createElement('label');
   commentsLabel.for = comments.id;
@@ -199,7 +333,72 @@ showReviewForm = () => {
   submit.type = `submit`;
   submit.innerHTML = `Submit Review`;
   submit.id = `submit-button`;
+  submit.addEventListener('click', function(event){
+    event.preventDefault();
 
+    //collect submitted form data
+    let fullname = document.getElementById(`fullname`).value;
+    let comments = document.getElementById(`comments`).value;
+    let rating = 0
+    for(let i=0; i<5; i++){
+      if(document.getElementById(`star-${i+1}`).checked){
+        rating = document.getElementById(`star-${i+1}`).value;
+        break;
+      }
+    }
+
+    let data = {
+      restaurant_id: id,
+      name: fullname,
+      rating: rating,
+      comments: comments
+    };
+
+    console.log(JSON.stringify(data))
+    //send data to server using fetch api
+    fetch('http://localhost:1337/reviews/',{
+      method: `POST`,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify(data),
+    })
+    .then(function(response){
+      if(!response.ok){
+        throw new Error(response.status);
+      }
+      else {
+        window.alert("Review Submitted successfully! ");
+      }
+    }).catch(function(error){    //if network is not available store review in IndexedDB
+
+      //idbpromise to retrive key of latest rescord in IndexedDB
+      idbPromise.then(function(db){
+        let storeTransaction = db.transaction(`reviews`,`readwrite`);
+        let reviewsStore = storeTransaction.objectStore(`reviews`);
+        return reviewsStore.getAllKeys();
+      }).then(function(keys){
+        let maxKey = Math.max(...keys);
+        //prepare data to insert in idb
+        data.synchStatus = 'pending';
+        data.id = maxKey+1;
+        console.log(data);
+        // idbpromise to store prepared data in IndexedDB
+        idbPromise.then(function(db){
+          let storeTransaction = db.transaction(`reviews`,`readwrite`);
+          let reviewsStore = storeTransaction.objectStore(`reviews`);
+          return reviewsStore.put(data);
+        }).then(function(status){
+          window.alert("You are in offline mode. Your review will get synched and appear on page once you go online.")
+        });
+      }).catch(function(){
+        console.log(`error`);
+      });
+
+    });
+    //close review form pop-up
+    modal_wrap.classList.add('close');
+  });
   form.appendChild(submit);
 
   const cancel = document.createElement('button');
@@ -219,7 +418,7 @@ showReviewForm = () => {
   container.appendChild(modal_wrap);
 }
 
-reviewButtonHTML = () => {
+reviewButtonHTML = (restaurant = self.restaurant) => {
   const container = document.getElementById('reviews-container');
   const button = document.createElement('button');
   button.innerHTML = 'Write Review';
@@ -229,7 +428,7 @@ reviewButtonHTML = () => {
     let form  = document.getElementById(`review-form`);
     if(form == undefined){
       //if review form does not exists, create one.
-      showReviewForm();
+      showReviewForm(id = restaurant.id);
     }
     else{
       //else remove close class from review form's modal div, to make it visible
@@ -242,12 +441,59 @@ reviewButtonHTML = () => {
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+
+fetchReviews = (restaurant_id = self.restaurant.id) => {
+  let idbPromise = DBHelper.createIdb();
+  fetch(`http://localhost:1337/reviews/?restaurant_id=${restaurant_id}`).then(function(response){
+    if(!response.ok){
+      throw new Error(response.status);
+    }
+    else{
+      return response.json();
+    }
+  }).then(function(jsondata){
+    fillReviewsHTML(jsondata);
+    //store reviews in IndexedDB
+    idbPromise.then(function(db){
+      let storeTransaction = db.transaction('reviews','readwrite');
+      let reviewsStore = storeTransaction.objectStore('reviews');
+      for(key in jsondata){
+        reviewsStore.put(jsondata[key]);
+      }
+    });
+  }).catch(function(error){
+    console.log(error);
+    idbPromise.then(function(db){
+      let readTransaction = db.transaction('reviews', 'readonly');
+      let reviewsStore = readTransaction.objectStore('reviews');
+      return reviewsStore.getAll();
+    }).then(function(reviews){
+      let reviews_for_restaurant = []
+      for(key in reviews){
+        let review = reviews[key];
+        for(key in review){
+          //if key is restaurant_id which is same as id then display that review
+          if (key == `restaurant_id`) {
+            if(review[key] == restaurant_id){
+              reviews_for_restaurant.push(review)
+              console.log(review);
+            }
+          }
+        }
+      }
+      console.log(reviews_for_restaurant);
+      fillReviewsHTML(reviews_for_restaurant);
+    });
+  });
+}
+
+fillReviewsHTML = (reviews) => {
+  let idbPromise = DBHelper.createIdb();
+  //fetch reviews from URL using restaurant id
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
   container.appendChild(title);
-
   if (!reviews) {
     const noReviews = document.createElement('p');
     noReviews.innerHTML = 'No reviews yet!';
@@ -270,7 +516,8 @@ createReviewHTML = (review,id) => {
   const li = document.createElement('li');
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  let dateObject = new Date(review.updatedAt);
+  date.innerHTML = dateObject.toDateString();
   date.className = `review-date`;
   date.id = `review-date-${id}`;
   li.appendChild(date);
@@ -282,7 +529,6 @@ createReviewHTML = (review,id) => {
   li.appendChild(name);
 
   const rating = document.createElement('p');
-  console.log(review.rating);
   for (var i = 0; i < review.rating; i++) {
     const star = document.createElement('span');
     star.className = "fa fa-star checked";

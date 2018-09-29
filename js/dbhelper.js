@@ -4,8 +4,9 @@
 
 class DBHelper {
 static createIdb() {
-  let dbPromise = idb.open('restaurants-db', 1, function(upgradeDb){
+  let dbPromise = idb.open('restaurantsDB', 1, function(upgradeDb){
 		upgradeDb.createObjectStore('restaurants',{keyPath:'id'});
+    upgradeDb.createObjectStore('reviews',{keyPath:'id'});
 	});
   return dbPromise;
 }
@@ -41,7 +42,7 @@ static createIdb() {
           let restaurantsStore = storeTransaction.objectStore('restaurants');
           for(let key in jsondata){
             restaurantsStore.put(jsondata[key]);
-        }
+          }
         console.log("data inserted into idb!");
       });
       callback(null,jsondata);

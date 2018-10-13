@@ -5,11 +5,11 @@ var urlsToCache = [
   'restaurant.html',
   'https://use.fontawesome.com/releases/v5.3.1/css/all.css',
   'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css',
-  'css/styles.css',
-  'js/dbhelper.js',
-  'js/main.js',
-  'js/restaurant_info.js',
-
+  'build/css/styles.min.css',
+  'build/js/dbhelper.min.js',
+  'build/js/main.min.js',
+  'build/js/idb.min.js',
+  'build/js/restaurant_info.min.js',
 ];
 
 //install event will cache the data in browser.

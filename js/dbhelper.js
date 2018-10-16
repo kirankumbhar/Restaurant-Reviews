@@ -180,7 +180,7 @@ static createIdb() {
     if(restaurant.photograph==undefined){
       restaurant.photograph = restaurant.id;
     }
-    return (`./img/${restaurant.photograph}.jpg`);
+    return (`./build/img/${restaurant.photograph}.webp`);
   }
 
   /**

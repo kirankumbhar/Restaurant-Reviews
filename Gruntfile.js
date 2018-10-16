@@ -54,7 +54,20 @@ module.exports = function(grunt) {
         }
       }
     },
-
+    // convert jpg/png to webp
+    cwebp: {
+      dynamic: {
+        options: {
+          q: 50
+        },
+        files: [{
+          expand: true,
+          cwd: 'img/',
+          src: ['**/*.{png,jpg,gif}'],
+          dest: 'build/img/'
+        }]
+      }
+    },
     /* Clear out the images directory if it exists */
     clean: {
       dev: {
@@ -79,8 +92,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mkdir');
   grunt.loadNpmTasks('grunt-contrib-uglify-es');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-cwebp');
   grunt.registerTask('default', ['clean', 'mkdir', 'responsive_images']);
   grunt.registerTask('minify',['uglify']);
   grunt.registerTask('css',['cssmin']);
+  grunt.registerTask('img_conv',['cwebp']);
 
 };
